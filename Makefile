@@ -12,17 +12,17 @@ help: ## 显示帮助信息
 # 开发环境
 dev: ## 启动开发环境
 	@echo "🚀 启动开发环境..."
-	docker-compose -f docker/dev/docker-compose.yml up -d
+	docker compose -f docker/dev/docker-compose.yml up -d
 	@echo "✅ 开发环境已启动"
 	@echo "   数据库: localhost:5432"
 	@echo "   Redis: localhost:6379"
 
 dev-down: ## 停止开发环境
 	@echo "🛑 停止开发环境..."
-	docker-compose -f docker-compose.dev.yml down
+	docker compose -f docker-compose.dev.yml down
 
 dev-logs: ## 查看开发环境日志
-	docker-compose -f docker-compose.dev.yml logs -f
+	docker compose -f docker-compose.dev.yml logs -f
 
 # 构建
 build: ## 构建 Docker 镜像
@@ -149,10 +149,6 @@ clean-dev: ## 清理开发环境 Docker 资源
 test: ## 运行测试
 	@echo "🧪 运行测试..."
 	npm run typecheck
-
-test-workflow: ## 测试工作流
-	@echo "🔄 测试工作流..."
-	npm run workflow:test
 
 # 安装和设置
 install: ## 安装依赖
