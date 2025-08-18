@@ -17,7 +17,9 @@ export const auth = betterAuth({
     },
   }),
   plugins: [
-    admin()
+    admin({
+      
+    })
   ], 
   emailVerification: {
     sendOnSignUp: true, // 注册时自动发送验证邮件
