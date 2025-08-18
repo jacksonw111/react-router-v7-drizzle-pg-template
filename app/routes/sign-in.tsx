@@ -192,14 +192,24 @@ function SignInForm() {
             </form>
           </Form>
 
-          <div className="text-center text-sm">
-            <span className="text-muted-foreground">还没有账户？</span>{" "}
-            <Link
-              to="/sign-up"
-              className="text-primary hover:underline font-medium"
-            >
-              立即注册
-            </Link>
+          <div className="text-center text-sm space-y-2">
+            <div>
+              <Link
+                to="/forgot-password"
+                className="text-primary hover:underline font-medium"
+              >
+                忘记密码？
+              </Link>
+            </div>
+            <div>
+              <span className="text-muted-foreground">还没有账户？</span>{" "}
+              <Link
+                to="/sign-up"
+                className="text-primary hover:underline font-medium"
+              >
+                立即注册
+              </Link>
+            </div>
           </div>
         </div>
       </div>

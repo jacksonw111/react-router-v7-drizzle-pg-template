@@ -68,8 +68,48 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true, // 要求邮箱验证
-  },
+    sendResetPassword: async ({
+      user,
+      url,
+    }: {
+      user: { email: string };
+      url: string;
+    }) => {
+      console.log(`发送密码重置邮件给 ${user.email}: ${url}`);
 
+      try {
+        var response = await resend.emails.send({
+          from: "onboarding@codized.top", // 替换为你的域名
+          to: user.email,
+          subject: "重置您的密码",
+          html: `
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+                  <h2 style="color: #333;">密码重置请求</h2>
+                  <p>我们收到您请求重置密码的请求。请点击下面的按钮重置您的密码：</p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${url}" 
+                       style="background-color: #007bff; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 5px; display: inline-block;">
+                      重置密码
+                    </a>
+                  </div>
+                  <p style="color: #666; font-size: 14px;">
+                    如果按钮无法点击，请复制以下链接到浏览器地址栏：<br>
+                    <a href="${url}">${url}</a>
+                  </p>
+                  <p style="color: #666; font-size: 12px;">
+                    此链接将在1小时后过期。如果您没有请求重置密码，请忽略此邮件。
+                  </p>
+                </div>
+              `,
+        });
+        console.log("发送密码重置邮件成功:", response);
+      } catch (error) {
+        console.error("发送密码重置邮件失败:", error);
+        throw error;
+      }
+    },
+  },
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
