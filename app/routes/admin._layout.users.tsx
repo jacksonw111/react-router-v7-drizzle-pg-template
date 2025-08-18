@@ -10,8 +10,6 @@ import {
 import { useEffect, useState } from "react";
 import { type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
-import { useDebounce } from "~/lib/hooks/use-debounce";
-import { useDebouncedCallback, useThrottledCallback } from "~/lib/hooks/use-debounced-callback";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +64,8 @@ import {
 } from "~/components/ui/table";
 import { auth } from "~/lib/auth";
 import { authClient } from "~/lib/auth-client";
+import { useDebounce } from "~/lib/hooks/use-debounce";
+import { useThrottledCallback } from "~/lib/hooks/use-debounced-callback";
 
 // Initialize auth client with admin plugin
 
@@ -128,7 +128,7 @@ export default function AdminUsers() {
   const [banReason, setBanReason] = useState("");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  
+
   useEffect(() => {
     fetchUsers();
   }, [currentPage, debouncedSearchTerm]);
