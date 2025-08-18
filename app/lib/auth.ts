@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin as adminPlugin } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "~/db"; // your drizzle instance
 import { account, session, user, verification } from "~/db/schemas/auth-schema";
-import { admin } from "better-auth/plugins"
+import { ac, admin, superAdmin } from "~/lib/admin-permissions";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 export const auth = betterAuth({
@@ -17,10 +18,14 @@ export const auth = betterAuth({
     },
   }),
   plugins: [
-    admin({
-      
-    })
-  ], 
+    adminPlugin({
+      ac,
+      roles: {
+        admin,
+        superAdmin,
+      },
+    }),
+  ],
   emailVerification: {
     sendOnSignUp: true, // 注册时自动发送验证邮件
     autoSignInAfterVerification: true, // 验证后自动登录
@@ -76,3 +81,15 @@ export const auth = betterAuth({
     },
   },
 });
+
+export const userHasPermission = async (userId: string) => {
+  return await auth.api.userHasPermission({
+    body: {
+      userId,
+      role: "admin",
+      permission: {
+        project: ["create", "update"],
+      },
+    },
+  });
+};
