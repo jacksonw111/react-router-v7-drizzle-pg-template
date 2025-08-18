@@ -102,7 +102,7 @@ export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(5);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -187,13 +187,28 @@ export default function AdminUsers() {
         });
       }
 
-      // Note: better-auth admin plugin doesn't provide direct user profile updates
-      // For updating email/name, you would need to implement custom API endpoints
-      // or use the regular user update endpoints if available
-      
-      toast.success("User role updated successfully");
-      setShowEditDialog(false);
-      fetchUsers();
+      // Update email and name using custom API endpoint
+      const response = await fetch("/api/admin/update-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          email: editUser.email,
+          name: editUser.name,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("User updated successfully");
+        setShowEditDialog(false);
+        fetchUsers();
+      } else {
+        toast.error(result.error || "Failed to update user");
+      }
     } catch (error) {
       toast.error("Failed to update user");
       console.error("Error updating user:", error);
@@ -529,10 +544,39 @@ export default function AdminUsers() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User Role</DialogTitle>
-            <DialogDescription>Update user role for {selectedUser?.email}</DialogDescription>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user information for {selectedUser?.email}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="edit-name"
+                value={editUser.name}
+                onChange={(e) =>
+                  setEditUser({ ...editUser, name: e.target.value })
+                }
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="edit-email"
+                value={editUser.email}
+                onChange={(e) =>
+                  setEditUser({ ...editUser, email: e.target.value })
+                }
+                className="col-span-3"
+                type="email"
+              />
+            </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-role" className="text-right">
                 Role
