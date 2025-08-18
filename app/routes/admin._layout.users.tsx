@@ -10,6 +10,8 @@ import {
 import { useEffect, useState } from "react";
 import { type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
+import { useDebounce } from "~/lib/hooks/use-debounce";
+import { useDebouncedCallback, useThrottledCallback } from "~/lib/hooks/use-debounced-callback";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -125,9 +127,11 @@ export default function AdminUsers() {
   const [newPassword, setNewPassword] = useState("");
   const [banReason, setBanReason] = useState("");
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   const fetchUsers = async () => {
     try {
@@ -154,7 +158,7 @@ export default function AdminUsers() {
     }
   };
 
-  const handleCreateUser = async () => {
+  const handleCreateUser = useThrottledCallback(async () => {
     try {
       const response = await authClient.admin.createUser({
         email: newUser.email,
@@ -173,9 +177,9 @@ export default function AdminUsers() {
       toast.error("Failed to create user");
       console.error("Error creating user:", error);
     }
-  };
+  }, 1000);
 
-  const handleUpdateUser = async () => {
+  const handleUpdateUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
 
     try {
@@ -213,9 +217,9 @@ export default function AdminUsers() {
       toast.error("Failed to update user");
       console.error("Error updating user:", error);
     }
-  };
+  }, 1000);
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
 
     try {
@@ -232,9 +236,9 @@ export default function AdminUsers() {
       toast.error("Failed to delete user");
       console.error("Error deleting user:", error);
     }
-  };
+  }, 1000);
 
-  const handleBanUser = async () => {
+  const handleBanUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
 
     try {
@@ -257,9 +261,9 @@ export default function AdminUsers() {
       toast.error("Failed to ban/unban user");
       console.error("Error banning/unbanning user:", error);
     }
-  };
+  }, 1000);
 
-  const handleSetPassword = async () => {
+  const handleSetPassword = useThrottledCallback(async () => {
     if (!selectedUser) return;
 
     try {
@@ -275,7 +279,7 @@ export default function AdminUsers() {
       toast.error("Failed to update password");
       console.error("Error updating password:", error);
     }
-  };
+  }, 1000);
 
   const openEditDialog = (user: User) => {
     setSelectedUser(user);
