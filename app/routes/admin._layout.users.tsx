@@ -8,7 +8,7 @@ import {
   UserX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { type LoaderFunctionArgs } from "react-router";
+import { type LoaderFunctionArgs, useLoaderData } from "react-router";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -78,7 +78,79 @@ export async function loader(args: LoaderFunctionArgs) {
     throw Response.json({ message: "Please login first" }, { status: 401 });
   }
 
-  return { user: session.user };
+  // Check if user has admin access
+  const isAdmin = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: {
+        user: ["list"],
+      },
+    },
+  });
+
+  if (!isAdmin.success) {
+    throw Response.json(
+      { message: "Insufficient permissions" },
+      { status: 403 }
+    );
+  }
+
+  // Check specific permissions for different actions
+  const canCreateUser = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: {
+        user: ["create"],
+      },
+    },
+  });
+
+  const canEditUser = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: {
+        user: ["set-role", "set-password"],
+      },
+    },
+  });
+
+  const canDeleteUser = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: {
+        user: ["delete"],
+      },
+    },
+  });
+
+  const canBanUser = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: {
+        user: ["ban"],
+      },
+    },
+  });
+  console.log({
+    user: session.user,
+    permissions: {
+      canCreateUser: canCreateUser.success || false,
+      canEditUser: canEditUser.success || false,
+      canDeleteUser: canDeleteUser.success || false,
+      canBanUser: canBanUser.success || false,
+      canSetPassword: canEditUser.success || false, // Same as edit user
+    },
+  });
+  return {
+    user: session.user,
+    permissions: {
+      canCreateUser: canCreateUser.success || false,
+      canEditUser: canEditUser.success || false,
+      canDeleteUser: canDeleteUser.success || false,
+      canBanUser: canBanUser.success || false,
+      canSetPassword: canEditUser.success || false, // Same as edit user
+    },
+  };
 }
 
 interface User {
@@ -99,6 +171,9 @@ interface UsersResponse {
 }
 
 export default function AdminUsers() {
+  const loaderData = useLoaderData<typeof loader>();
+  const { permissions } = loaderData;
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -159,6 +234,11 @@ export default function AdminUsers() {
   };
 
   const handleCreateUser = useThrottledCallback(async () => {
+    if (!permissions.canCreateUser) {
+      toast.error("You don't have permission to create users");
+      return;
+    }
+
     try {
       const response = await authClient.admin.createUser({
         email: newUser.email,
@@ -181,6 +261,11 @@ export default function AdminUsers() {
 
   const handleUpdateUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
+
+    if (!permissions.canEditUser) {
+      toast.error("You don't have permission to edit users");
+      return;
+    }
 
     try {
       // Update role using setRole endpoint
@@ -222,6 +307,11 @@ export default function AdminUsers() {
   const handleDeleteUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
 
+    if (!permissions.canDeleteUser) {
+      toast.error("You don't have permission to delete users");
+      return;
+    }
+
     try {
       const response = await authClient.admin.removeUser({
         userId: selectedUser.id,
@@ -240,6 +330,11 @@ export default function AdminUsers() {
 
   const handleBanUser = useThrottledCallback(async () => {
     if (!selectedUser) return;
+
+    if (!permissions.canBanUser) {
+      toast.error("You don't have permission to ban/unban users");
+      return;
+    }
 
     try {
       if (selectedUser.banned) {
@@ -265,6 +360,11 @@ export default function AdminUsers() {
 
   const handleSetPassword = useThrottledCallback(async () => {
     if (!selectedUser) return;
+
+    if (!permissions.canSetPassword) {
+      toast.error("You don't have permission to set user passwords");
+      return;
+    }
 
     try {
       await authClient.admin.setUserPassword({
@@ -317,10 +417,12 @@ export default function AdminUsers() {
             Manage user accounts and permissions
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
+        {permissions.canCreateUser && (
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -402,33 +504,49 @@ export default function AdminUsers() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={() => openEditDialog(user)}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openPasswordDialog(user)}
-                            >
-                              <Key className="mr-2 h-4 w-4" />
-                              Set Password
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openBanDialog(user)}
-                            >
-                              <Ban className="mr-2 h-4 w-4" />
-                              {user.banned ? "Unban" : "Ban"} User
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openDeleteDialog(user)}
-                              className="text-destructive"
-                            >
-                              <UserX className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
+                            {permissions.canEditUser && (
+                              <DropdownMenuItem
+                                onClick={() => openEditDialog(user)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            {permissions.canSetPassword && (
+                              <DropdownMenuItem
+                                onClick={() => openPasswordDialog(user)}
+                              >
+                                <Key className="mr-2 h-4 w-4" />
+                                Set Password
+                              </DropdownMenuItem>
+                            )}
+                            {(permissions.canEditUser ||
+                              permissions.canSetPassword) &&
+                              (permissions.canBanUser ||
+                                permissions.canDeleteUser) && (
+                                <DropdownMenuSeparator />
+                              )}
+                            {permissions.canBanUser && (
+                              <DropdownMenuItem
+                                onClick={() => openBanDialog(user)}
+                              >
+                                <Ban className="mr-2 h-4 w-4" />
+                                {user.banned ? "Unban" : "Ban"} User
+                              </DropdownMenuItem>
+                            )}
+                            {permissions.canBanUser &&
+                              permissions.canDeleteUser && (
+                                <DropdownMenuSeparator />
+                              )}
+                            {permissions.canDeleteUser && (
+                              <DropdownMenuItem
+                                onClick={() => openDeleteDialog(user)}
+                                className="text-destructive"
+                              >
+                                <UserX className="mr-2 h-4 w-4" />
+                                Delete User
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
