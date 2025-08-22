@@ -5,8 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  type unstable_MiddlewareFunction,
 } from "react-router";
 
+import { useTranslation } from "react-i18next";
+import "~/lib/i18n";
+import { ThemeProvider } from "~/lib/theme";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -24,8 +28,10 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation();
+
   return (
-    <html lang="en">
+    <html lang={i18n.language || "zh-CN"}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -42,7 +48,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ThemeProvider>
+      <Outlet />;
+    </ThemeProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -73,16 +83,18 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     </main>
   );
 }
-
-async function loggingMiddleware({ request, context }, next) {
+const loggingMiddleware: unstable_MiddlewareFunction = async (
+  { request, context },
+  next
+) => {
   console.log(`${new Date().toISOString()} ${request.method} ${request.url}`);
   const start = performance.now();
   const response = await next();
   const duration = performance.now() - start;
   console.log(
-    `${new Date().toISOString()} Response ${response.status} (${duration}ms)`
+    `${new Date().toISOString()} Response ${response?.status} (${duration}ms)`
   );
   return response;
-}
+};
 
 export const unstable_middleware = [loggingMiddleware];

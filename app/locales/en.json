@@ -1,0 +1,60 @@
+{
+  "common": {
+    "home": "Home",
+    "articles": "Articles",
+    "search": "Search",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "share": "Share",
+    "bookmark": "Bookmark",
+    "unbookmark": "Remove Bookmark",
+    "languages": {
+      "zh": "中文",
+      "en": "English",
+      "ja": "日本語",
+      "ko": "한국어"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "articles": "Articles",
+    "categories": "Categories",
+    "favorites": "Favorites",
+    "history": "Reading History",
+    "profile": "Profile"
+  },
+
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginRequired": "Please login first",
+    "loginRequiredMessage": "You need to login to use features like likes, bookmarks, etc.",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "loggingIn": "Logging in...",
+    "loginSuccess": "Login successful",
+    "logoutSuccess": "Logout successful",
+    "invalidCredentials": "Invalid username or password"
+  }
+}

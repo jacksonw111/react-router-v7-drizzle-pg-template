@@ -65,6 +65,7 @@ function SignUpForm() {
         {
           email: values.email,
           password: values.password,
+          image: "api.dicebear.com/7.x/pixel-art/svg",
           name: values.name,
         },
         {
