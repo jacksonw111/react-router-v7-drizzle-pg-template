@@ -78,7 +78,7 @@ function SignUpForm() {
             setIsLoading(false);
             // 不立即跳转，让用户看到验证邮件提示
             setTimeout(() => {
-              navigate("/sign-in");
+              navigate("/login");
             }, 3000);
           },
           onError: (ctx: any) => {

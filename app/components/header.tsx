@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { LanguageSwitcher } from "~/components/language-switcher";
 import { ThemeToggle } from "~/components/theme-toggle";
-import { Button } from "~/components/ui/button";
-import { UserAvatar } from "~/components/user-avatar";
+import { UserMenu } from "~/components/user-menu";
 
 interface HeaderProps {
   user?: User | null;
@@ -16,8 +15,7 @@ interface HeaderProps {
 export function Header({ user, isVisible = true }: HeaderProps) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const { t } = useTranslation();
-  console.log(user)
+  console.log(user);
   useEffect(() => {
     const controlHeader = () => {
       const currentScrollY = window.scrollY;
@@ -71,7 +69,7 @@ export function Header({ user, isVisible = true }: HeaderProps) {
               <ThemeToggle />
             </div>
 
-            {user ? (
+            {/* {user ? (
               <UserAvatar user={user} />
             ) : (
               <div className="flex items-center space-x-1 sm:space-x-2">
@@ -91,7 +89,8 @@ export function Header({ user, isVisible = true }: HeaderProps) {
                   <Link to="/register">{t("auth.register")}</Link>
                 </Button>
               </div>
-            )}
+            )} */}
+            <UserMenu user={user} />
           </div>
         </div>
       </header>

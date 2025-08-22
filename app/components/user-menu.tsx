@@ -1,5 +1,6 @@
 import type { User } from "better-auth";
 import { LogOut, Settings } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -18,14 +19,16 @@ export function loader({ context }: LoaderFunctionArgs) {
 }
 export function UserMenu({ user }: { user?: User | null }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   if (!user) {
     return (
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
-          <Link to="/login">登录</Link>
+          <Link to="/login">{t("auth.login")}</Link>
         </Button>
         <Button asChild>
-          <Link to="/register">注册</Link>
+          <Link to="/register">{t("auth.login")}</Link>
         </Button>
       </div>
     );
