@@ -3,6 +3,7 @@ import { LogOut, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
+import useSWR from "swr";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,13 +15,21 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { userContext } from "~/context";
 import { authClient } from "~/lib/auth-client";
+
 export function loader({ context }: LoaderFunctionArgs) {
   return context.get(userContext);
 }
 export function UserMenu({ user }: { user?: User | null }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
+  const { data } = useSWR(user ? user.id : null, (id) =>
+    authClient.admin.hasPermission({
+      userId: id,
+      permission: {
+        customer: ["read"],
+      },
+    })
+  );
   if (!user) {
     return (
       <div className="flex items-center space-x-2">
@@ -28,7 +37,7 @@ export function UserMenu({ user }: { user?: User | null }) {
           <Link to="/login">{t("auth.login")}</Link>
         </Button>
         <Button asChild>
-          <Link to="/register">{t("auth.login")}</Link>
+          <Link to="/register">{t("auth.register")}</Link>
         </Button>
       </div>
     );
@@ -75,6 +84,16 @@ export function UserMenu({ user }: { user?: User | null }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {data?.data?.success && (
+          <DropdownMenuItem asChild>
+            <Link to="/bo/dashboard" className="flex items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>后台管理</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+
         <DropdownMenuItem
           onClick={handleSignOut}
           className="flex items-center cursor-pointer"
