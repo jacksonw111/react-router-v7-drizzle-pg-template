@@ -3,17 +3,28 @@ import { adminAc, defaultStatements } from "better-auth/plugins/admin/access";
 
 export const statement = {
   ...defaultStatements,
-  project: ["create", "share", "update", "delete", "ban"], // <-- Permissions available for created roles
+  project: ["create", "share", "update", "delete", "ban"],
+  customer: ["read", "update"],
 } as const;
 
 export const ac = createAccessControl(statement);
 
+// 管理员 - 拥有所有权限
 export const admin = ac.newRole({
-  project: ["create", "update"],
+  project: ["create", "share", "update", "delete", "ban"],
+  customer: ["read", "update"],
   ...adminAc.statements,
 });
 
-export const superAdmin = ac.newRole({
-  project: ["create", "update", "delete"],
-  user: ["ban"],
+// 用户管理员 - 管理用户相关操作
+export const userManager = ac.newRole({
+  project: ["create", "share", "update"],
+  user: ["create", "list", "set-role", "ban"],
+  customer: ["read", "update"],
+});
+
+// 客户 - 基础用户角色
+export const customer = ac.newRole({
+  project: [],
+  customer: [],
 });

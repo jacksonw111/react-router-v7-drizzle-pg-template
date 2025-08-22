@@ -15,12 +15,11 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { userContext } from "~/context";
 import { authClient } from "~/lib/auth-client";
-import type { Route } from "./+types/_auth.profile";
+import type { Route } from "./+types/_layout.profile";
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const user = context.get(userContext);
   if (!user) return redirect("/login");
-
   return user;
 }
 

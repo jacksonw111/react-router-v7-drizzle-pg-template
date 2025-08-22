@@ -1,6 +1,6 @@
 import type { User } from "better-auth";
 import { LogOut, Settings } from "lucide-react";
-import { Link, type LoaderFunctionArgs } from "react-router";
+import { Link, useNavigate, type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -16,15 +16,16 @@ import { authClient } from "~/lib/auth-client";
 export function loader({ context }: LoaderFunctionArgs) {
   return context.get(userContext);
 }
-export function UserMenu(user?: User) {
+export function UserMenu({ user }: { user?: User | null }) {
+  const navigate = useNavigate();
   if (!user) {
     return (
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
-          <Link to="/sign-in">登录</Link>
+          <Link to="/login">登录</Link>
         </Button>
         <Button asChild>
-          <Link to="/sign-up">注册</Link>
+          <Link to="/register">注册</Link>
         </Button>
       </div>
     );
@@ -33,6 +34,7 @@ export function UserMenu(user?: User) {
   const handleSignOut = async () => {
     try {
       await authClient.signOut();
+      navigate("/");
       toast.success("已成功退出登录");
     } catch (error) {
       toast.error("退出登录失败");
@@ -64,7 +66,7 @@ export function UserMenu(user?: User) {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/settings" className="flex items-center">
+          <Link to="/profile" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>账户设置</span>
           </Link>
