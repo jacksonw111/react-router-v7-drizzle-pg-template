@@ -1,5 +1,10 @@
-import { type LoaderFunctionArgs, Outlet } from "react-router";
-import { auth, userHasPermission } from "~/lib/auth";
+import { Home, LogOut, Settings, Shield, Users } from "lucide-react";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  type unstable_MiddlewareFunction,
+} from "react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -16,29 +21,12 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "~/components/animate-ui/radix/sidebar";
-import {
-  Users,
-  Home,
-  Settings,
-  Shield,
-  LogOut,
-} from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { authMiddleware } from "~/middlewares/auth";
 
-export async function loader(args: LoaderFunctionArgs) {
-  const session = await auth.api.getSession({
-    headers: args.request.headers,
-  });
-  if (!session?.user) {
-    throw Response.json({ message: "Please login first" }, { status: 401 });
-  }
 
-  if (!userHasPermission(session.user.id)) {
-    throw Response.json({ message: "Permission denied" }, { status: 403 });
-  }
-
-  return { user: session.user };
-}
+export const unstable_middleware: unstable_MiddlewareFunction[] = [
+  authMiddleware,
+];
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -93,7 +81,10 @@ export default function AdminLayout() {
               <SidebarMenu>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                    >
                       <Link to={item.url}>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
