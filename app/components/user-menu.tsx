@@ -1,6 +1,7 @@
 import type { User } from "better-auth";
 import { LogOut, Settings } from "lucide-react";
-import { Link, useNavigate, type LoaderFunctionArgs } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -11,13 +12,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { userContext } from "~/context";
 import { authClient } from "~/lib/auth-client";
-export function loader({ context }: LoaderFunctionArgs) {
-  return context.get(userContext);
-}
+
 export function UserMenu({ user }: { user?: User | null }) {
   const navigate = useNavigate();
+  useEffect(() => {
+    if (user) {
+      authClient.admin
+        .hasPermission({
+          userId: user.id,
+          permission: {
+            customer: ["read"],
+          },
+        })
+        .then((res) => {
+          console.log(res)
+          setHasPermission(res.data?.success || false);
+        });
+    }
+  }, []);
+
+  const [hasPermission, setHasPermission] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+      navigate("/");
+      toast.success("已成功退出登录");
+    } catch (error) {
+      toast.error("退出登录失败");
+    }
+  };
   if (!user) {
     return (
       <div className="flex items-center space-x-2">
@@ -30,16 +55,6 @@ export function UserMenu({ user }: { user?: User | null }) {
       </div>
     );
   }
-
-  const handleSignOut = async () => {
-    try {
-      await authClient.signOut();
-      navigate("/");
-      toast.success("已成功退出登录");
-    } catch (error) {
-      toast.error("退出登录失败");
-    }
-  };
 
   return (
     <DropdownMenu>
@@ -72,6 +87,18 @@ export function UserMenu({ user }: { user?: User | null }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {hasPermission && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/bo/dashboard" className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>后台管理</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         <DropdownMenuItem
           onClick={handleSignOut}
           className="flex items-center cursor-pointer"
