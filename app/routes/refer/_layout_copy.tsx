@@ -1,6 +1,8 @@
+import type { Route } from ".react-router/types/app/routes/+types/_layout";
 import { Home, LogOut, Settings, Shield, Users } from "lucide-react";
 import {
   Link,
+  NavLink,
   Outlet,
   useLocation,
   type unstable_MiddlewareFunction,
@@ -23,13 +25,26 @@ import {
 } from "~/components/animate-ui/radix/sidebar";
 import { authMiddleware } from "~/middlewares/auth";
 
-
 export const unstable_middleware: unstable_MiddlewareFunction[] = [
   authMiddleware,
 ];
 
-export default function AdminLayout() {
+export async function loader() {
+  // 初始化整个后端系统的设置。 比如设置主题，侧边栏， 根据权限配置初始化菜单
+  // 注意，用户的每次导航都会触发
+  console.log("helo");
+  return "theme1";
+}
+
+export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const location = useLocation();
+  // if (loaderData == "theme1") {
+  //   return (
+  //     <>
+  //       heihei <Outlet />
+  //     </>
+  //   );
+  // }
 
   const menuItems = [
     {
@@ -41,11 +56,6 @@ export default function AdminLayout() {
       title: "Users",
       url: "/admin/users",
       icon: Users,
-    },
-    {
-      title: "Roles & Permissions",
-      url: "/admin/roles",
-      icon: Shield,
     },
     {
       title: "Settings",
@@ -85,10 +95,10 @@ export default function AdminLayout() {
                       asChild
                       isActive={location.pathname === item.url}
                     >
-                      <Link to={item.url}>
+                      <NavLink to={item.url}>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
-                      </Link>
+                      </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

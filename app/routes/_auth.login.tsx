@@ -1,9 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import {
+  Link,
+  redirect,
+  useNavigate,
+  type LoaderFunctionArgs,
+} from "react-router";
 import { z } from "zod";
-import { AuthGuard } from "~/components/auth-guard";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -14,6 +18,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { userContext } from "~/context";
 import { authClient } from "~/lib/auth-client";
 
 const formSchema = z.object({
@@ -217,10 +222,13 @@ function SignInForm() {
   );
 }
 
-export default function SignIn() {
-  return (
-    <AuthGuard>
-      <SignInForm />
-    </AuthGuard>
-  );
+export async function loader(args: LoaderFunctionArgs) {
+  const user = args.context.get(userContext);
+  if (user) {
+    return redirect("/");
+  }
+}
+
+export default function Login() {
+  return <SignInForm />;
 }

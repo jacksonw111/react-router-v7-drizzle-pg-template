@@ -1,5 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -7,95 +10,65 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { authClient } from "~/lib/auth-client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { AuthGuard } from "~/components/auth-guard";
+const formSchema = z.object({
+  email: z.email("请输入有效的邮箱地址").min(1, "邮箱不能为空"),
+  password: z.string().min(1, "密码不能为空"),
+});
 
-const formSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, "姓名至少需要2个字符")
-      .max(50, "姓名不能超过50个字符"),
-    email: z.email("请输入有效的邮箱地址").min(1, "邮箱不能为空"),
-    password: z.string().min(8, "密码至少需要8位").max(50, "密码不能超过50位"),
-    confirmPassword: z
-      .string()
-      .min(8, "确认密码至少需要8位")
-      .max(50, "确认密码不能超过50位"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "密码不匹配",
-    path: ["confirmPassword"],
-  });
-
-function SignUpForm() {
+function SignInForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error">("error");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const submit = async (values: z.infer<typeof formSchema>) => {
+  const signIn = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    setMessage("");
+    setError("");
 
     try {
-      await authClient.signUp.email(
+      await authClient.signIn.email(
         {
           email: values.email,
           password: values.password,
-          name: values.name,
         },
         {
           onRequest: () => {
             setIsLoading(true);
           },
           onSuccess: () => {
-            setMessage("注册成功！请检查您的邮箱并点击验证链接。");
-            setMessageType("success");
-            setIsLoading(false);
-            // 不立即跳转，让用户看到验证邮件提示
-            setTimeout(() => {
-              navigate("/sign-in");
-            }, 3000);
+            navigate("/");
           },
           onError: (ctx: any) => {
-            setMessage(`注册失败: ${ctx.error?.message || "未知错误"}`);
-            setMessageType("error");
+            setError(ctx.error?.message || "登录失败，请检查您的邮箱和密码");
             setIsLoading(false);
-            console.error(ctx.error);
           },
         }
       );
-    } catch (error) {
-      setMessage("注册失败，请稍后重试");
-      setMessageType("error");
+    } catch (err) {
+      setError("登录失败，请稍后重试");
       setIsLoading(false);
-      console.error(error);
     }
   };
-  const signUpWithGithub = async () => {
+
+  const signInWithGithub = async () => {
     await authClient.signIn.social({
       provider: "github",
       callbackURL: "/",
     });
   };
 
-  const signUpWithGoogle = async () => {
+  const signInWithGoogle = async () => {
     await authClient.signIn.social({
       provider: "google",
       callbackURL: "/",
@@ -106,15 +79,15 @@ function SignUpForm() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">创建账户</h1>
-          <p className="text-sm text-muted-foreground">注册新账户开始使用</p>
+          <h1 className="text-2xl font-semibold tracking-tight">欢迎回来</h1>
+          <p className="text-sm text-muted-foreground">登录您的账户以继续</p>
         </div>
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              onClick={signUpWithGithub}
+              onClick={signInWithGithub}
               disabled={isLoading}
               className="w-full"
             >
@@ -129,7 +102,7 @@ function SignUpForm() {
             </Button>
             <Button
               variant="outline"
-              onClick={signUpWithGoogle}
+              onClick={signInWithGoogle}
               disabled={isLoading}
               className="w-full"
             >
@@ -161,41 +134,18 @@ function SignUpForm() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                或使用邮箱注册
+                或使用邮箱登录
               </span>
             </div>
           </div>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
-              {message && (
-                <div
-                  className={`p-3 text-sm rounded-md ${
-                    messageType === "success"
-                      ? "text-green-700 bg-green-50 border border-green-200 dark:text-green-400 dark:bg-green-950 dark:border-green-800"
-                      : "text-destructive bg-destructive/10 border border-destructive/20"
-                  }`}
-                >
-                  {message}
+            <form onSubmit={form.handleSubmit(signIn)} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                  {error}
                 </div>
               )}
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>姓名</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="输入您的姓名"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -211,6 +161,7 @@ function SignUpForm() {
                         disabled={isLoading}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -224,57 +175,47 @@ function SignUpForm() {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="输入密码（至少8位）"
+                        placeholder="输入您的密码"
                         {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>确认密码</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="再次输入密码"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "注册中..." : "注册账户"}
+                {isLoading ? "登录中..." : "登录"}
               </Button>
             </form>
           </Form>
 
-          <div className="text-center text-sm">
-            <span className="text-muted-foreground">已有账户？</span>{" "}
-            <Link
-              to="/sign-in"
-              className="text-primary hover:underline font-medium"
-            >
-              立即登录
-            </Link>
+          <div className="text-center text-sm space-y-2">
+            <div>
+              <Link
+                to="/forgot-password"
+                className="text-primary hover:underline font-medium"
+              >
+                忘记密码？
+              </Link>
+            </div>
+            <div>
+              <span className="text-muted-foreground">还没有账户？</span>{" "}
+              <Link
+                to="/sign-up"
+                className="text-primary hover:underline font-medium"
+              >
+                立即注册
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-export default function SignUp() {
-  return (
-    <AuthGuard>
-      <SignUpForm />
-    </AuthGuard>
-  );
+
+export default function SignIn() {
+  return <SignInForm />;
 }
