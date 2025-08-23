@@ -1,11 +1,10 @@
 import type { User } from "better-auth";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { LanguageSwitcher } from "~/components/language-switcher";
-import { ThemeToggle } from "~/components/theme-toggle";
-import { UserMenu } from "~/components/user-menu";
+import { LanguageSwitcher } from "~/components/layout/language-switcher";
+import { ThemeToggle } from "~/components/layout/theme-toggle";
+import { UserMenu } from "~/components/layout/user-menu";
 
 interface HeaderProps {
   user?: User | null;
@@ -69,7 +68,6 @@ export function Header({ user, isVisible = true }: HeaderProps) {
               <ThemeToggle />
             </div>
 
-          
             <UserMenu user={user} />
           </div>
         </div>
