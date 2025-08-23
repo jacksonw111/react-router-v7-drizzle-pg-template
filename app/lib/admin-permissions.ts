@@ -18,9 +18,14 @@ export const admin = ac.newRole({
 
 // 用户管理员 - 管理用户相关操作
 export const userManager = ac.newRole({
-  project: ["create", "share", "update"],
-  user: ["create", "list", "set-role", "ban"],
+  // project: ["create", "share", "update"],
+  user: ["create", "list", "update"],
   customer: ["read", "update"],
+});
+
+export const userReader = ac.newRole({
+  user: ["list"],
+  customer: ["read"],
 });
 
 // 客户 - 基础用户角色

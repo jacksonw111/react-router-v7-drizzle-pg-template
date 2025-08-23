@@ -4,7 +4,13 @@ import { admin as adminPlugin } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "~/db"; // your drizzle instance
 import { account, session, user, verification } from "~/db/schemas/auth-schema";
-import { ac, admin, userManager, customer } from "~/lib/admin-permissions";
+import {
+  ac,
+  admin,
+  customer,
+  userManager,
+  userReader,
+} from "~/lib/admin-permissions";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 export const auth = betterAuth({
@@ -23,6 +29,7 @@ export const auth = betterAuth({
       roles: {
         admin,
         userManager,
+        userReader,
         customer,
       },
     }),
