@@ -8,7 +8,7 @@ interface AdminLayoutProps {
     name: string;
     email: string;
     avatar?: string;
-    permissions: string[];
+    permissions?: string[];
   };
 }
 

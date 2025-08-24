@@ -26,7 +26,7 @@ export function UserMenu({ user }: { user?: User | null }) {
     authClient.admin.hasPermission({
       userId: id,
       permission: {
-        customer: ["read"],
+        system: ["access"],
       },
     })
   );

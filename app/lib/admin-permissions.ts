@@ -5,7 +5,7 @@ export const statement = {
   ...defaultStatements,
   // project: ["create", "share", "update", "delete", "ban"],
   // customer: ["read", "update"],
-  system: ["access"],
+  system: ["visit", "access"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -14,7 +14,7 @@ export const ac = createAccessControl(statement);
 export const admin = ac.newRole({
   // project: ["create", "share", "update", "delete", "ban"],
   // customer: ["read", "update"],
-  system: ["access"],
+  system: ["visit", "access"],
   ...adminAc.statements,
 });
 
@@ -27,8 +27,10 @@ export const userManager = ac.newRole({
 
 export const userReader = ac.newRole({
   user: ["list"],
-  system: ["access"],
+  system: ["visit", "access"],
 });
 
 // 客户 - 基础用户角色
-export const customer = ac.newRole({});
+export const customer = ac.newRole({
+  system: ["visit"],
+});

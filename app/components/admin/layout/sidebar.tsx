@@ -1,20 +1,7 @@
-import {
-  ChevronRight,
-  Database,
-  Home,
-  Menu,
-  Settings,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Home, LogOut, Menu, UserCircle, Users } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router";
 import { Button } from "~/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn } from "~/lib/utils";
 
@@ -39,54 +26,15 @@ const defaultMenuItems: MenuItem[] = [
     id: "dashboard",
     label: "Dashboard",
     icon: Home,
-    href: "/admin",
+    href: "/bo/dashboard",
     permissions: ["dashboard:view"],
   },
   {
     id: "users",
     label: "Users",
     icon: Users,
-    href: "/admin/users",
+    href: "/bo/users",
     permissions: ["user:read"],
-  },
-  {
-    id: "roles",
-    label: "Roles & Permissions",
-    icon: Shield,
-    href: "/admin/roles",
-    permissions: ["role:read"],
-  },
-  {
-    id: "system",
-    label: "System",
-    icon: Settings,
-    children: [
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/admin/settings",
-        permissions: ["settings:read"],
-      },
-      {
-        id: "appearance",
-        label: "Appearance",
-        href: "/admin/appearance",
-        permissions: ["appearance:read"],
-      },
-      {
-        id: "menu",
-        label: "Menu Management",
-        href: "/admin/menu",
-        permissions: ["menu:manage"],
-      },
-    ],
-  },
-  {
-    id: "database",
-    label: "Database",
-    icon: Database,
-    href: "/admin/database",
-    permissions: ["database:read"],
   },
 ];
 
@@ -96,6 +44,7 @@ interface MenuItemProps {
   userPermissions: string[];
   isExpanded: boolean;
   onToggle: (id: string) => void;
+  isCollapsed: boolean;
 }
 
 function MenuItemComponent({
@@ -104,61 +53,72 @@ function MenuItemComponent({
   userPermissions,
   isExpanded,
   onToggle,
+  isCollapsed,
 }: MenuItemProps) {
-  const hasPermission =
-    !item.permissions ||
-    item.permissions.some((p) => userPermissions.includes(p));
+  // const hasPermission =
+  //   !item.permissions ||
+  //   item.permissions.some((p) => userPermissions.includes(p));
 
-  if (!hasPermission) return null;
+  // if (!hasPermission) return null;
 
   const Icon = item.icon;
   const hasChildren = item.children && item.children.length > 0;
 
   if (hasChildren) {
-    const hasChildrenPermission = item.children.some(
-      (child) =>
-        !child.permissions ||
-        child.permissions.some((p) => userPermissions.includes(p))
-    );
-
-    if (!hasChildrenPermission) return null;
-
-    return (
-      <Collapsible
-        open={isExpanded}
-        onOpenChange={() => onToggle(item.id)}
-        className="group"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors">
-            <div className="flex items-center gap-3">
-              {Icon && <Icon className="h-4 w-4" />}
-              <span>{item.label}</span>
-            </div>
-            <ChevronRight
-              className={cn(
-                "h-4 w-4 transition-transform",
-                isExpanded && "rotate-90"
-              )}
-            />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="ml-4 space-y-1">
-            {item.children?.map((child) => (
-              <MenuItemComponent
-                key={child.id}
-                item={child}
-                level={level + 1}
-                userPermissions={userPermissions}
-                isExpanded={false}
-                onToggle={onToggle}
-              />
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    );
+    // const hasChildrenPermission = item.children.some(
+    //   (child) =>
+    //     !child.permissions ||
+    //     child.permissions.some((p) => userPermissions.includes(p))
+    // );
+    //   // if (!hasChildrenPermission) return null;
+    // return (
+    //   <Collapsible
+    //     open={isExpanded}
+    //     onOpenChange={() => onToggle(item.id)}
+    //     className="group"
+    //   >
+    //     {/* <CollapsibleTrigger className="w-full">
+    //       <div
+    //         className={cn(
+    //           "flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg hover:bg-accent/50 transition-colors",
+    //           isCollapsed && "justify-center px-2"
+    //         )}
+    //       >
+    //         <div
+    //           className={cn("flex items-center gap-3", isCollapsed && "gap-0")}
+    //         >
+    //           {Icon && <Icon className="h-4 w-4" />}
+    //           {!isCollapsed && <span>{item.label}</span>}
+    //         </div>
+    //         {!isCollapsed && (
+    //           <ChevronRight
+    //             className={cn(
+    //               "h-4 w-4 transition-transform",
+    //               isExpanded && "rotate-90"
+    //             )}
+    //           />
+    //         )}
+    //       </div>
+    //     </CollapsibleTrigger> */}
+    //     {/* {!isCollapsed && (
+    //       <CollapsibleContent>
+    //         <div className="ml-4 space-y-1">
+    //           {item.children?.map((child) => (
+    //             <MenuItemComponent
+    //               key={child.id}
+    //               item={child}
+    //               level={level + 1}
+    //               userPermissions={userPermissions}
+    //               isExpanded={false}
+    //               onToggle={onToggle}
+    //               isCollapsed={isCollapsed}
+    //             />
+    //           ))}
+    //         </div>
+    //       </CollapsibleContent>
+    //     )} */}
+    //   </Collapsible>
+    // );
   }
 
   return (
@@ -170,12 +130,13 @@ function MenuItemComponent({
           isActive
             ? "bg-primary/10 text-primary"
             : "hover:bg-accent/50 text-muted-foreground",
-          level > 0 && "ml-4"
+          level > 0 && "ml-4",
+          isCollapsed && "justify-center px-2 gap-0"
         )
       }
     >
       {Icon && <Icon className="h-4 w-4" />}
-      <span>{item.label}</span>
+      {!isCollapsed && <span>{item.label}</span>}
     </NavLink>
   );
 }
@@ -198,24 +159,24 @@ export function AdminSidebar({
     setExpandedItems(newExpanded);
   };
 
-  const filteredMenuItems = menuItems.filter((item) => {
-    if (item.children) {
-      return item.children.some(
-        (child) =>
-          !child.permissions ||
-          child.permissions.some((p) => userPermissions.includes(p))
-      );
-    }
-    return (
-      !item.permissions ||
-      item.permissions.some((p) => userPermissions.includes(p))
-    );
-  });
+  // const filteredMenuItems = menuItems.filter((item) => {
+  //   if (item.children) {
+  //     return item.children.some(
+  //       (child) =>
+  //         !child.permissions ||
+  //         child.permissions.some((p) => userPermissions.includes(p))
+  //     );
+  //   }
+  //   return (
+  //     !item.permissions ||
+  //     item.permissions.some((p) => userPermissions.includes(p))
+  //   );
+  // });
 
   return (
     <aside
       className={cn(
-        "bg-card border-r transition-all duration-300 h-screen",
+        "bg-card border-r transition-all duration-300 h-screen flex flex-col",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -238,7 +199,7 @@ export function AdminSidebar({
 
       <ScrollArea className="flex-1 py-4">
         <nav className="space-y-1 px-2">
-          {filteredMenuItems.map((item) => (
+          {defaultMenuItems.map((item) => (
             <MenuItemComponent
               key={item.id}
               item={item}
@@ -246,10 +207,53 @@ export function AdminSidebar({
               userPermissions={userPermissions}
               isExpanded={expandedItems.has(item.id)}
               onToggle={handleToggle}
+              isCollapsed={isCollapsed}
             />
           ))}
         </nav>
       </ScrollArea>
+
+      <div className="border-t p-2">
+        <div
+          className={cn(
+            "flex items-center gap-3",
+            isCollapsed && "justify-center"
+          )}
+        >
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <UserCircle className="h-4 w-4" />
+          </div>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">Admin User</p>
+              <p className="text-xs text-muted-foreground truncate">
+                admin@example.com
+              </p>
+            </div>
+          )}
+        </div>
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mt-2 justify-start"
+            onClick={() => console.log("Logout clicked")}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        )}
+        {isCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-full mt-2"
+            onClick={() => console.log("Logout clicked")}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </aside>
   );
 }

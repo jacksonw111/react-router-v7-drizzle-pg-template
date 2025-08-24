@@ -129,15 +129,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-export const userHasPermission = async (userId: string) => {
-  return await auth.api.userHasPermission({
-    body: {
-      userId,
-      role: "admin",
-      permission: {
-        project: ["create", "update"],
-      },
-    },
-  });
-};

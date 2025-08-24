@@ -1,4 +1,4 @@
-import type { Route } from ".react-router/types/app/routes/+types/_bo-layout.bo.appearance";
+import type { Route } from "./+types/_bo-layout";
 import {
   type LoaderFunctionArgs,
   redirect,
@@ -49,8 +49,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 const BOLayout = ({ loaderData }: Route.ComponentProps) => {
-  // const { user } = useLoaderData<typeof loader>();
-
   return <AdminLayout user={loaderData} />;
 };
 export default BOLayout;
