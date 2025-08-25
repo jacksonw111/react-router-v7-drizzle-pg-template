@@ -209,7 +209,7 @@ function SignInForm() {
             <div>
               <span className="text-muted-foreground">还没有账户？</span>{" "}
               <Link
-                to="/sign-up"
+                to="/register"
                 className="text-primary hover:underline font-medium"
               >
                 立即注册

@@ -243,16 +243,7 @@ export function AdminSidebar({
             Logout
           </Button>
         )}
-        {isCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-full mt-2"
-            onClick={() => console.log("Logout clicked")}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        )}
+        
       </div>
     </aside>
   );

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
+import { authClient } from "~/lib/auth-client";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -99,7 +100,10 @@ export function AdminHeader({ onToggleSidebar, user }: HeaderProps) {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Account</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={async () => await authClient.signOut()}
+              >
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>

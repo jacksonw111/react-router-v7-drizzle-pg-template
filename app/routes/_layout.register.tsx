@@ -268,7 +268,7 @@ function SignUpForm() {
           <div className="text-center text-sm">
             <span className="text-muted-foreground">已有账户？</span>{" "}
             <Link
-              to="/sign-in"
+              to="/login"
               className="text-primary hover:underline font-medium"
             >
               立即登录
