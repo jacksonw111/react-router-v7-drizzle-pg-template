@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import useSWRMutation from "swr/mutation";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
 
 interface User {
@@ -40,7 +40,12 @@ interface EditUserForm {
   role: string;
 }
 
-export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: UpdateUserDialogProps) {
+export function UpdateUserDialog({
+  open,
+  onOpenChange,
+  user,
+  onSuccess,
+}: UpdateUserDialogProps) {
   const [editUser, setEditUser] = useState<EditUserForm>({
     email: "",
     name: "",
@@ -51,7 +56,7 @@ export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: Update
     user ? `update-user-${user.id}` : null,
     async () => {
       if (!user) return;
-      
+
       // Update role
       if (editUser.role !== user.role) {
         await authClient.admin.setRole({
@@ -59,23 +64,17 @@ export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: Update
           role: editUser.role as "user" | "admin",
         });
       }
-      
-      // Update user info via API
-      const response = await fetch("/api/admin/update-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          email: editUser.email,
+
+      const response = await authClient.admin.updateUser({
+        userId: user?.id,
+        data: {
           name: editUser.name,
-        }),
+        },
       });
-      
-      if (!response.ok) {
+
+      if (!response.data) {
         throw new Error("Failed to update user");
       }
-      
-      return response.json();
     },
     {
       onSuccess: () => {
@@ -123,7 +122,9 @@ export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: Update
               <Input
                 id="edit-name"
                 value={editUser.name}
-                onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                onChange={(e) =>
+                  setEditUser({ ...editUser, name: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
@@ -134,7 +135,9 @@ export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: Update
               <Input
                 id="edit-email"
                 value={editUser.email}
-                onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                onChange={(e) =>
+                  setEditUser({ ...editUser, email: e.target.value })
+                }
                 className="col-span-3"
                 type="email"
                 required
@@ -146,7 +149,9 @@ export function UpdateUserDialog({ open, onOpenChange, user, onSuccess }: Update
               </Label>
               <Select
                 value={editUser.role}
-                onValueChange={(value) => setEditUser({ ...editUser, role: value })}
+                onValueChange={(value) =>
+                  setEditUser({ ...editUser, role: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue />

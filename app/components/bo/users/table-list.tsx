@@ -100,7 +100,7 @@ export const BOUserTable: PropsWithChildren<any> = ({ children }: any) => {
                       </Button>
                     </DropdownMenuTrigger>
                     
-                    {children}
+                    {typeof children === 'function' ? children(user) : children}
                   </DropdownMenu>
                 </TableCell>
               </TableRow>

@@ -65,7 +65,46 @@ export async function loader({ context }: LoaderFunctionArgs) {
   };
 }
 
+import { useState } from "react";
+import { UpdateUserDialog, DeleteUserDialog, SetPasswordDialog, BanUserDialog, UnbanUserDialog } from "~/components/bo/users";
+import { mutate } from "swr";
+
 const BOUsers = ({ loaderData }: Route.ComponentProps) => {
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [unbanDialogOpen, setUnbanDialogOpen] = useState(false);
+
+  const openEditDialog = (user: any) => {
+    setSelectedUser(user);
+    setEditDialogOpen(true);
+  };
+
+  const openPasswordDialog = (user: any) => {
+    setSelectedUser(user);
+    setPasswordDialogOpen(true);
+  };
+
+  const openDeleteDialog = (user: any) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const openBanDialog = (user: any) => {
+    setSelectedUser(user);
+    if (user.banned) {
+      setUnbanDialogOpen(true);
+    } else {
+      setBanDialogOpen(true);
+    }
+  };
+
+  const refreshUsers = () => {
+    mutate((key) => typeof key === "string" && key.startsWith("fetch-users"));
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -77,45 +116,79 @@ const BOUsers = ({ loaderData }: Route.ComponentProps) => {
       <div>
         {loaderData.permission.create && <CreateUserDialog />}
         <BOUserTable>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            {loaderData.permission.edit && (
-              <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-            )}
-            {loaderData.permission.set_password && (
-              <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
-                <Key className="mr-2 h-4 w-4" />
-                Set Password
-              </DropdownMenuItem>
-            )}
-            {(loaderData.permission.edit ||
-              loaderData.permission.set_password) &&
-              (loaderData.permission.ban || loaderData.permission.delete) && (
+          {(user: any) => (
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              {loaderData.permission.edit && (
+                <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+              )}
+              {loaderData.permission.set_password && (
+                <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
+                  <Key className="mr-2 h-4 w-4" />
+                  Set Password
+                </DropdownMenuItem>
+              )}
+              {(loaderData.permission.edit ||
+                loaderData.permission.set_password) &&
+                (loaderData.permission.ban || loaderData.permission.delete) && (
+                  <DropdownMenuSeparator />
+                )}
+              {loaderData.permission.ban && (
+                <DropdownMenuItem onClick={() => openBanDialog(user)}>
+                  <Ban className="mr-2 h-4 w-4" />
+                  {user.banned ? "Unban" : "Ban"} User
+                </DropdownMenuItem>
+              )}
+              {loaderData.permission.ban && loaderData.permission.delete && (
                 <DropdownMenuSeparator />
               )}
-            {loaderData.permission.ban && (
-              <DropdownMenuItem onClick={() => openBanDialog(user)}>
-                <Ban className="mr-2 h-4 w-4" />
-                {loaderData.user?.banned ? "Unban" : "Ban"} User
-              </DropdownMenuItem>
-            )}
-            {loaderData.permission.ban && loaderData.permission.delete && (
-              <DropdownMenuSeparator />
-            )}
-            {loaderData.permission.delete && (
-              <DropdownMenuItem
-                onClick={() => openDeleteDialog(user)}
-                className="text-destructive"
-              >
-                <UserX className="mr-2 h-4 w-4" />
-                Delete User
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
+              {loaderData.permission.delete && (
+                <DropdownMenuItem
+                  onClick={() => openDeleteDialog(user)}
+                  className="text-destructive"
+                >
+                  <UserX className="mr-2 h-4 w-4" />
+                  Delete User
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          )}
         </BOUserTable>
+
+        {/* Dialogs */}
+        <UpdateUserDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          user={selectedUser}
+          onSuccess={refreshUsers}
+        />
+        <SetPasswordDialog
+          open={passwordDialogOpen}
+          onOpenChange={setPasswordDialogOpen}
+          user={selectedUser}
+          onSuccess={refreshUsers}
+        />
+        <DeleteUserDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          user={selectedUser}
+          onSuccess={refreshUsers}
+        />
+        <BanUserDialog
+          open={banDialogOpen}
+          onOpenChange={setBanDialogOpen}
+          user={selectedUser}
+          onSuccess={refreshUsers}
+        />
+        <UnbanUserDialog
+          open={unbanDialogOpen}
+          onOpenChange={setUnbanDialogOpen}
+          user={selectedUser}
+          onSuccess={refreshUsers}
+        />
       </div>
     </div>
   );
