@@ -23,6 +23,18 @@ export const auth = betterAuth({
       verification,
     },
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          console.log(
+            "创建用户时候先调用这个函数，其中 user 是比如注册的数据， 可以检查一下是否符合注册的规则在写入数据库"
+          );
+        },
+      },
+    },
+  },
+
   plugins: [
     adminPlugin({
       ac,

@@ -1,5 +1,7 @@
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useState } from "react";
-import useSWRMutation from "swr/mutation";
+import { mutate } from "swr";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,14 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
-
-interface CreateUserDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
-}
 
 interface NewUserForm {
   email: string;
@@ -33,33 +28,30 @@ interface NewUserForm {
   role: string;
 }
 
-export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDialogProps) {
+export function CreateUserDialog() {
   const [newUser, setNewUser] = useState<NewUserForm>({
     email: "",
     name: "",
     password: "",
     role: "user",
   });
-
-  const { trigger: createUser, isMutating } = useSWRMutation(
-    "create-user",
-    () => authClient.admin.createUser({
-      email: newUser.email,
-      password: newUser.password,
-      name: newUser.name,
-      role: newUser.role,
-    }),
-    {
-      onSuccess: () => {
-        setNewUser({ email: "", name: "", password: "", role: "user" });
+  const [open, setOpen] = useState(false);
+  const onOpenChange = (isOpen: boolean) => setOpen(isOpen);
+  const createUser = async () => {
+    authClient.admin
+      .createUser({
+        email: newUser.email,
+        password: newUser.password,
+        name: newUser.name,
+        role: newUser.role as any,
+      })
+      .then(() => {
+        mutate(
+          (key) => typeof key === "string" && key.startsWith("fetch-users")
+        );
         onOpenChange(false);
-        onSuccess?.();
-      },
-      onError: (error) => {
-        console.error("Error creating user:", error);
-      },
-    }
-  );
+      });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +60,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger>
+        <Button>add user</Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
@@ -82,7 +77,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               <Input
                 id="email"
                 value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
                 className="col-span-3"
                 type="email"
                 required
@@ -95,7 +92,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               <Input
                 id="name"
                 value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, name: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
@@ -106,7 +105,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               <Input
                 id="password"
                 value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
                 className="col-span-3"
                 type="password"
                 required
@@ -118,7 +119,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               </Label>
               <Select
                 value={newUser.role}
-                onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+                onValueChange={(value) =>
+                  setNewUser({ ...newUser, role: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue />
@@ -138,9 +141,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isMutating}>
-              {isMutating ? "Creating..." : "Create User"}
-            </Button>
+            <Button type="submit">create</Button>
           </DialogFooter>
         </form>
       </DialogContent>

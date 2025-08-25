@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754966653014,
-      "tag": "0000_grey_zaladane",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1755355976298,
-      "tag": "0001_reflective_santa_claus",
+      "when": 1756107947280,
+      "tag": "0000_brown_venus",
       "breakpoints": true
     }
   ]

@@ -1,15 +1,14 @@
-import { Ban, Edit, Key, MoreVertical, UserX } from "lucide-react";
-import { useState } from "react";
+"use client";
+
+import { MoreVertical } from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useState, type PropsWithChildren } from "react";
 import useSWR from "swr";
 import { AnimatedPagination } from "~/components/ui/animated-pagination";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
@@ -22,22 +21,27 @@ import {
 } from "~/components/ui/table";
 import { authClient } from "~/lib/auth-client";
 
-export const BOUserTable = (permissions) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+export const BOUserTable: PropsWithChildren<any> = ({ children }: any) => {
+  const [searchTerm, setSearchTerm] = useQueryState("searchTerm");
+  const [currentPage, setCurrentPage] = useQueryState(
+    "currentPage",
+    parseAsInteger.withDefault(1)
+  );
   const [pageSize] = useState(5);
-  const fetchUsers = authClient.admin.listUsers({
-    query: {
-      limit: pageSize,
-      offset: (currentPage - 1) * pageSize,
-      searchValue: searchTerm,
-      searchField: "email",
-      searchOperator: "contains",
-    },
-  });
   const { data, isLoading } = useSWR(
     `fetch-users-${currentPage}-${searchTerm}`,
-    () => fetchUsers
+    () =>
+      authClient.admin.listUsers({
+        query: {
+          limit: pageSize,
+          offset: (currentPage - 1) * pageSize,
+          searchValue: searchTerm ?? undefined,
+          searchField: "email",
+          searchOperator: "contains",
+          sortDirection: "desc",
+          sortBy: "createdAt",
+        },
+      })
   );
   return (
     <div>
@@ -95,47 +99,8 @@ export const BOUserTable = (permissions) => {
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {permissions.canEditUser && (
-                        <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      )}
-                      {permissions.canSetPassword && (
-                        <DropdownMenuItem
-                          onClick={() => openPasswordDialog(user)}
-                        >
-                          <Key className="mr-2 h-4 w-4" />
-                          Set Password
-                        </DropdownMenuItem>
-                      )}
-                      {(permissions.canEditUser ||
-                        permissions.canSetPassword) &&
-                        (permissions.canBanUser ||
-                          permissions.canDeleteUser) && (
-                          <DropdownMenuSeparator />
-                        )}
-                      {permissions.canBanUser && (
-                        <DropdownMenuItem onClick={() => openBanDialog(user)}>
-                          <Ban className="mr-2 h-4 w-4" />
-                          {user.banned ? "Unban" : "Ban"} User
-                        </DropdownMenuItem>
-                      )}
-                      {permissions.canBanUser && permissions.canDeleteUser && (
-                        <DropdownMenuSeparator />
-                      )}
-                      {permissions.canDeleteUser && (
-                        <DropdownMenuItem
-                          onClick={() => openDeleteDialog(user)}
-                          className="text-destructive"
-                        >
-                          <UserX className="mr-2 h-4 w-4" />
-                          Delete User
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
+                    
+                    {children}
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
