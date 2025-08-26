@@ -32,6 +32,7 @@ export function AdminLayout({ user }: AdminLayoutProps) {
           userPermissions={user?.permissions || []}
           isCollapsed={isSidebarCollapsed}
           onToggle={handleToggleSidebar}
+          user={user}
         />
       </div>
 
@@ -46,6 +47,7 @@ export function AdminLayout({ user }: AdminLayoutProps) {
             <AdminSidebar
               userPermissions={user?.permissions || []}
               onToggle={handleToggleMobileMenu}
+              user={user}
             />
           </div>
         </div>
@@ -53,7 +55,7 @@ export function AdminLayout({ user }: AdminLayoutProps) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <AdminHeader onToggleSidebar={handleToggleMobileMenu} user={user} />
+        <AdminHeader onToggleSidebar={handleToggleMobileMenu} />
 
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-4 py-6">

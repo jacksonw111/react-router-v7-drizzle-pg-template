@@ -1,9 +1,19 @@
-import { Home, LogOut, Menu, UserCircle, Users } from "lucide-react";
+import { Home, LogOut, Menu, Users, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { cn } from "~/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { authClient } from "~/lib/auth-client";
 
 interface MenuItem {
   id: string;
@@ -19,6 +29,11 @@ interface SidebarProps {
   menuItems?: MenuItem[];
   isCollapsed?: boolean;
   onToggle?: () => void;
+  user?: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
 }
 
 const defaultMenuItems: MenuItem[] = [
@@ -128,8 +143,8 @@ function MenuItemComponent({
         cn(
           "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
           isActive
-            ? "bg-primary/10 text-primary"
-            : "hover:bg-accent/50 text-muted-foreground",
+            ? "bg-blue-600 text-white"
+            : "text-gray-400 hover:bg-gray-800 hover:text-white",
           level > 0 && "ml-4",
           isCollapsed && "justify-center px-2 gap-0"
         )
@@ -146,6 +161,7 @@ export function AdminSidebar({
   menuItems = defaultMenuItems,
   isCollapsed = false,
   onToggle,
+  user,
 }: SidebarProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -176,21 +192,21 @@ export function AdminSidebar({
   return (
     <aside
       className={cn(
-        "bg-card border-r transition-all duration-300 h-screen flex flex-col",
+        "bg-gray-900 border-r border-gray-800 transition-all duration-300 h-screen flex flex-col text-white",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex h-16 items-center justify-between px-4 border-b">
+      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-800">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-primary/10" />
-            <span className="font-bold text-lg">Admin</span>
+            <div className="h-6 w-6 rounded bg-blue-600" />
+            <span className="font-bold text-lg text-white">Admin</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-800"
           onClick={onToggle}
         >
           <Menu className="h-4 w-4" />
@@ -213,37 +229,72 @@ export function AdminSidebar({
         </nav>
       </ScrollArea>
 
-      <div className="border-t p-2">
-        <div
-          className={cn(
-            "flex items-center gap-3",
-            isCollapsed && "justify-center"
-          )}
-        >
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <UserCircle className="h-4 w-4" />
-          </div>
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Admin User</p>
-              <p className="text-xs text-muted-foreground truncate">
-                admin@example.com
-              </p>
+      <div className="border-t border-gray-800 p-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div
+              className={cn(
+                "flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors",
+                isCollapsed && "justify-center"
+              )}
+            >
+              <Avatar className="h-8 w-8 border-2 border-gray-700">
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback className="text-xs bg-blue-600 text-white">
+                  {user?.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("") || "A"}
+                </AvatarFallback>
+              </Avatar>
+              
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate">
+                    {user?.email}
+                  </p>
+                </div>
+              )}
+              
+              {!isCollapsed && (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </div>
-          )}
-        </div>
-        {!isCollapsed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full mt-2 justify-start"
-            onClick={() => console.log("Logout clicked")}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-56 bg-gray-900 border-gray-800 text-white"
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
-        )}
-        
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none text-white">
+                  {user?.name}
+                </p>
+                <p className="text-xs leading-none text-gray-400">
+                  {user?.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-gray-800" />
+            <DropdownMenuItem className="text-gray-300 hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white">
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-gray-300 hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white">
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-gray-800" />
+            <DropdownMenuItem
+              className="text-red-400 hover:bg-red-950 hover:text-red-300 focus:bg-red-950 focus:text-red-300"
+              onClick={async () => await authClient.signOut()}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );
