@@ -1,9 +1,15 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin as adminPlugin } from "better-auth/plugins";
+import { admin as adminPlugin, bearer, jwt } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "~/db"; // your drizzle instance
-import { account, session, user, verification } from "~/db/schemas/auth-schema";
+import {
+  account,
+  jwks,
+  session,
+  user,
+  verification,
+} from "~/db/schemas/auth-schema";
 import {
   ac,
   admin,
@@ -21,6 +27,7 @@ export const auth = betterAuth({
       session,
       account,
       verification,
+      jwks,
     },
   }),
   databaseHooks: {
@@ -45,6 +52,8 @@ export const auth = betterAuth({
         customer,
       },
     }),
+    bearer(),
+    jwt(),
   ],
   emailVerification: {
     sendOnSignUp: true, // 注册时自动发送验证邮件

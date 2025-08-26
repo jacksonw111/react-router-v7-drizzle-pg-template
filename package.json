@@ -5,6 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "dotenv -e .env.dev -- react-router dev",
+    "preview": "dotenv -e .env.prod react-router-serve ./build/server/index.js", 
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "auth:generate": "dotenv -e .env.dev -- npx @better-auth/cli generate",

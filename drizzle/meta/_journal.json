@@ -8,6 +8,13 @@
       "when": 1756107947280,
       "tag": "0000_brown_venus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756188971299,
+      "tag": "0001_clumsy_lenny_balinger",
+      "breakpoints": true
     }
   ]
 }
