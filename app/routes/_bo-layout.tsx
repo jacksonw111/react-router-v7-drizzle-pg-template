@@ -4,6 +4,7 @@ import {
   type unstable_MiddlewareFunction,
 } from "react-router";
 import { AdminLayout } from "~/components/admin/layout/admin-layout";
+import { ThemeProvider } from "~/lib/theme";
 import { userContext } from "~/context";
 import { authMiddleware } from "~/middlewares/auth";
 import type { Route } from "./+types/_bo-layout";
@@ -19,6 +20,10 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 const BOLayout = ({ loaderData }: Route.ComponentProps) => {
-  return <AdminLayout user={loaderData} />;
+  return (
+    <ThemeProvider>
+      <AdminLayout user={loaderData} />
+    </ThemeProvider>
+  );
 };
 export default BOLayout;

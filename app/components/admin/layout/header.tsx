@@ -1,4 +1,4 @@
-import { Bell, Moon, Palette, Search, Settings, Sun } from "lucide-react";
+import { Bell, Search, Settings } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
+import { ThemeToggle } from "~/components/layout/theme-toggle";
 import { authClient } from "~/lib/auth-client";
 
 interface HeaderProps {
@@ -22,11 +23,6 @@ interface HeaderProps {
   };
 }
 
-const themes = [
-  { name: "Light", value: "light", icon: Sun },
-  { name: "Dark", value: "dark", icon: Moon },
-  { name: "System", value: "system", icon: Palette },
-];
 
 export function AdminHeader({ onToggleSidebar, user }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +58,8 @@ export function AdminHeader({ onToggleSidebar, user }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
+          
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <Bell className="h-4 w-4" />
             <span className="sr-only">Notifications</span>

@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
 import { userContext } from "~/context";
-// import type { user } from "~/db/schemas/auth-schema";
 import { auth } from "~/lib/auth";
 import type { Route } from "./+types/_bo-layout.bo.users";
 
@@ -66,8 +65,13 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 import { useState } from "react";
-import { UpdateUserDialog, DeleteUserDialog, SetPasswordDialog, BanUserDialog, UnbanUserDialog } from "~/components/bo/users";
 import { mutate } from "swr";
+import {
+  BanUserDialog,
+  DeleteUserDialog,
+  SetPasswordDialog,
+  UpdateUserDialog,
+} from "~/components/bo/users";
 
 const BOUsers = ({ loaderData }: Route.ComponentProps) => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -106,57 +110,62 @@ const BOUsers = ({ loaderData }: Route.ComponentProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="flex flex-col h-full">
+      <div className="pb-6">
         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
         <p className="text-muted-foreground">
           Manage users, roles, and permissions across your system
         </p>
       </div>
-      <div>
-        {loaderData.permission.create && <CreateUserDialog />}
-        <BOUserTable>
-          {(user: any) => (
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {loaderData.permission.edit && (
-                <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-              )}
-              {loaderData.permission.set_password && (
-                <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
-                  <Key className="mr-2 h-4 w-4" />
-                  Set Password
-                </DropdownMenuItem>
-              )}
-              {(loaderData.permission.edit ||
-                loaderData.permission.set_password) &&
-                (loaderData.permission.ban || loaderData.permission.delete) && (
+
+      <div className="flex-1 flex flex-col">
+        <div className="mb-4">
+          {loaderData.permission.create && <CreateUserDialog />}
+        </div>
+
+        <div className="flex-1 flex flex-col min-h-0">
+          <BOUserTable>
+            {(user: any) => (
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                {loaderData.permission.edit && (
+                  <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {loaderData.permission.set_password && (
+                  <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
+                    <Key className="mr-2 h-4 w-4" />
+                    Set Password
+                  </DropdownMenuItem>
+                )}
+                {(loaderData.permission.edit ||
+                  loaderData.permission.set_password) &&
+                  (loaderData.permission.ban ||
+                    loaderData.permission.delete) && <DropdownMenuSeparator />}
+                {loaderData.permission.ban && (
+                  <DropdownMenuItem onClick={() => openBanDialog(user)}>
+                    <Ban className="mr-2 h-4 w-4" />
+                    {user.banned ? "Unban" : "Ban"} User
+                  </DropdownMenuItem>
+                )}
+                {loaderData.permission.ban && loaderData.permission.delete && (
                   <DropdownMenuSeparator />
                 )}
-              {loaderData.permission.ban && (
-                <DropdownMenuItem onClick={() => openBanDialog(user)}>
-                  <Ban className="mr-2 h-4 w-4" />
-                  {user.banned ? "Unban" : "Ban"} User
-                </DropdownMenuItem>
-              )}
-              {loaderData.permission.ban && loaderData.permission.delete && (
-                <DropdownMenuSeparator />
-              )}
-              {loaderData.permission.delete && (
-                <DropdownMenuItem
-                  onClick={() => openDeleteDialog(user)}
-                  className="text-destructive"
-                >
-                  <UserX className="mr-2 h-4 w-4" />
-                  Delete User
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          )}
-        </BOUserTable>
+                {loaderData.permission.delete && (
+                  <DropdownMenuItem
+                    onClick={() => openDeleteDialog(user)}
+                    className="text-destructive"
+                  >
+                    <UserX className="mr-2 h-4 w-4" />
+                    Delete User
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            )}
+          </BOUserTable>
+        </div>
 
         {/* Dialogs */}
         <UpdateUserDialog
@@ -180,12 +189,6 @@ const BOUsers = ({ loaderData }: Route.ComponentProps) => {
         <BanUserDialog
           open={banDialogOpen}
           onOpenChange={setBanDialogOpen}
-          user={selectedUser}
-          onSuccess={refreshUsers}
-        />
-        <UnbanUserDialog
-          open={unbanDialogOpen}
-          onOpenChange={setUnbanDialogOpen}
           user={selectedUser}
           onSuccess={refreshUsers}
         />
