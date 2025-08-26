@@ -1,10 +1,22 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin as adminPlugin } from "better-auth/plugins";
+import { admin as adminPlugin, bearer, jwt } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "~/db"; // your drizzle instance
-import { account, session, user, verification } from "~/db/schemas/auth-schema";
-import { ac, admin, userManager, customer } from "~/lib/admin-permissions";
+import {
+  account,
+  jwks,
+  session,
+  user,
+  verification,
+} from "~/db/schemas/auth-schema";
+import {
+  ac,
+  admin,
+  customer,
+  userManager,
+  userReader,
+} from "~/lib/admin-permissions";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 export const auth = betterAuth({
@@ -15,17 +27,33 @@ export const auth = betterAuth({
       session,
       account,
       verification,
+      jwks,
     },
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          console.log(
+            "创建用户时候先调用这个函数，其中 user 是比如注册的数据， 可以检查一下是否符合注册的规则在写入数据库"
+          );
+        },
+      },
+    },
+  },
+
   plugins: [
     adminPlugin({
       ac,
       roles: {
         admin,
         userManager,
+        userReader,
         customer,
       },
     }),
+    bearer(),
+    jwt(),
   ],
   emailVerification: {
     sendOnSignUp: true, // 注册时自动发送验证邮件
@@ -122,15 +150,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-export const userHasPermission = async (userId: string) => {
-  return await auth.api.userHasPermission({
-    body: {
-      userId,
-      role: "admin",
-      permission: {
-        project: ["create", "update"],
-      },
-    },
-  });
-};

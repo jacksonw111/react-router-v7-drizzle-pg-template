@@ -1,11 +1,10 @@
 import type { User } from "better-auth";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { LanguageSwitcher } from "~/components/language-switcher";
-import { ThemeToggle } from "~/components/theme-toggle";
-import { UserMenu } from "~/components/user-menu";
+import { LanguageSwitcher } from "~/components/layout/language-switcher";
+import { ThemeToggle } from "~/components/layout/theme-toggle";
+import { UserMenu } from "~/components/layout/user-menu";
 
 interface HeaderProps {
   user?: User | null;
@@ -15,7 +14,6 @@ interface HeaderProps {
 export function Header({ user, isVisible = true }: HeaderProps) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const { t } = useTranslation();
   console.log(user);
   useEffect(() => {
     const controlHeader = () => {
@@ -51,10 +49,10 @@ export function Header({ user, isVisible = true }: HeaderProps) {
       initial={{ y: 0 }}
       animate={{ y: headerVisible ? 0 : -100 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed top-0 left-0 right-0 z-50 flex justify-center p-2 sm:p-4"
+      className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 sm:p-4"
     >
-      <header className="w-full max-w-6xl mx-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-border rounded-xl sm:rounded-2xl shadow-lg">
-        <div className="flex h-12 sm:h-14 items-center justify-between px-3 sm:px-6">
+      <header className="w-full max-w-4xl mx-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-border rounded-xl sm:rounded-2xl shadow-lg">
+        <div className="flex h-10 sm:h-12 items-center justify-between px-3 sm:px-6">
           <div className="flex items-center space-x-2 sm:space-x-4">
             <Link to="/" className="flex items-center space-x-1 sm:space-x-2">
               <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md flex items-center justify-center">
@@ -69,6 +67,7 @@ export function Header({ user, isVisible = true }: HeaderProps) {
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
+
             <UserMenu user={user} />
           </div>
         </div>

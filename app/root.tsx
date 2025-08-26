@@ -1,3 +1,4 @@
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import {
   isRouteErrorResponse,
   Links,
@@ -49,9 +50,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <Outlet />;
-    </ThemeProvider>
+    <NuqsAdapter>
+      <ThemeProvider>
+        <Outlet />
+      </ThemeProvider>
+    </NuqsAdapter>
   );
 }
 

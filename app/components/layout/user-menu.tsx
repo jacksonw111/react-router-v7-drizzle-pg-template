@@ -1,8 +1,9 @@
 import type { User } from "better-auth";
 import { LogOut, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { Link, useNavigate, type LoaderFunctionArgs } from "react-router";
 import { toast } from "sonner";
+import useSWR from "swr";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,43 +15,28 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { authClient } from "~/lib/auth-client";
 
+export function loader({ context }: LoaderFunctionArgs) {
+  return context.get(userContext);
+}
 export function UserMenu({ user }: { user?: User | null }) {
   const navigate = useNavigate();
-  useEffect(() => {
-    if (user) {
-      authClient.admin
-        .hasPermission({
-          userId: user.id,
-          permission: {
-            customer: ["read"],
-          },
-        })
-        .then((res) => {
-          console.log(res)
-          setHasPermission(res.data?.success || false);
-        });
-    }
-  }, []);
-
-  const [hasPermission, setHasPermission] = useState(false);
-
-  const handleSignOut = async () => {
-    try {
-      await authClient.signOut();
-      navigate("/");
-      toast.success("已成功退出登录");
-    } catch (error) {
-      toast.error("退出登录失败");
-    }
-  };
+  const { t } = useTranslation();
+  const { data } = useSWR(user ? user.id : null, (id) =>
+    authClient.admin.hasPermission({
+      userId: id,
+      permission: {
+        system: ["access"],
+      },
+    })
+  );
   if (!user) {
     return (
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
-          <Link to="/login">登录</Link>
+          <Link to="/login">{t("auth.login")}</Link>
         </Button>
         <Button asChild>
-          <Link to="/register">注册</Link>
+          <Link to="/register">{t("auth.register")}</Link>
         </Button>
       </div>
     );
@@ -87,17 +73,15 @@ export function UserMenu({ user }: { user?: User | null }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {hasPermission && (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/bo/dashboard" className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>后台管理</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
+        {data?.data?.success && (
+          <DropdownMenuItem asChild>
+            <Link to="/bo/dashboard" className="flex items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>后台管理</span>
+            </Link>
+          </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
 
         <DropdownMenuItem
           onClick={handleSignOut}

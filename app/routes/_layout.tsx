@@ -4,9 +4,9 @@ import {
   type LoaderFunctionArgs,
   type unstable_MiddlewareFunction,
 } from "react-router";
-import { BackToTop } from "~/components/back-to-top";
-import { Footer } from "~/components/footer";
-import { Header } from "~/components/header";
+import { BackToTop } from "~/components/layout/back-to-top";
+import { Footer } from "~/components/layout/footer";
+import { Header } from "~/components/layout/header";
 import { userContext } from "~/context";
 import { authMiddleware } from "~/middlewares/auth";
 import type { Route } from "./+types/_layout";

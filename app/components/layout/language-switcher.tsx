@@ -47,7 +47,7 @@ export function LanguageSwitcher() {
       >
         <Globe className="w-4 h-4" />
         <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-          {currentLanguage.flag} {currentLanguage.name}
+          {currentLanguage.name}
         </span>
         <span className="text-sm sm:hidden">{currentLanguage.flag}</span>
       </button>
