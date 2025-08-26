@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { userContext } from "~/context";
 import { authClient } from "~/lib/auth-client";
 
 export function loader({ context }: LoaderFunctionArgs) {
@@ -42,16 +41,6 @@ export function UserMenu({ user }: { user?: User | null }) {
       </div>
     );
   }
-
-  const handleSignOut = async () => {
-    try {
-      await authClient.signOut();
-      navigate("/");
-      toast.success("已成功退出登录");
-    } catch (error) {
-      toast.error("退出登录失败");
-    }
-  };
 
   return (
     <DropdownMenu>
